@@ -4,13 +4,20 @@ import Data.Bool
 import Control.Lens
 
 data Board = Board { _board  :: [[Char]]
-                   , diag    :: [Bool]
-                   , row     :: [Bool]
-                   , col     :: [Bool]
-                   , nQueens :: Int
-                   , mQueens :: Int
-                   , size    :: Int
+                   , _diag    :: [Bool]
+                   , _row     :: [Bool]
+                   , _col     :: [Bool]
+                   , _nQueens :: Int
+                   , _mQueens :: Int
+                   , _size    :: Int
                    } deriving (Show, Eq)
+                 
+nQueens' :: Int -> Int -> [Board]  
+nQueens' size num | size <= 0 = []
+                  | num < 0   = []
+                  | num == 0  = getBoard $ emptyBoard size 0
+--                  | otherwise = 
+                 
 
 emptyBools :: Int -> [Bool]
 emptyBools size = replicate size False
@@ -28,9 +35,8 @@ emptyBoard size wantedQueens =   Just $ Board (emptyBoardString size)
 diagonal :: Int -> (Int, Int) -> Int
 diagonal size (0, col) = size - 1 + col
 diagonal size (row, 0) = size - 1 - row
-diagonal size (row, col) = if row < col
-                            then diagonal size (0, col - row)
-                            else diagonal size (row - col, 0)
+diagonal size (row, col) | row < col = diagonal size (0, col - row)
+                         | otherwise = diagonal size (row - col, 0)
 
 placeBool :: Int -> [Bool] -> [Bool]
 placeBool index list | index < 0 = list
@@ -48,9 +54,20 @@ placeChar (row, col) board | row < 0 = board
                                          ++ [(board!!row) & element col .~ 'Q'] ++
                                          (drop (row + 1) board)
                                          
+getBoard :: Maybe Board -> [Board]
+getBoard board | board == Nothing = []
+               | otherwise        = (\(Just b) -> [b]) board
+                                         
+allPositions :: Int -> [(Int, Int)]
+allPositions size | size < 0  =  []
+                  | otherwise =  foldr (++) 
+                                 [] 
+                                 (map (\row -> map (\col -> (row, col)) 
+                                                   [0..(size - 1)])
+                                      [0..(size - 1)])
+
 placeQ :: Maybe Board -> (Int, Int) -> Maybe Board
 placeQ board (row, col) = board >>= (\board -> placeQ' board (row, col))
-
 placeQ' :: Board -> (Int, Int) -> Maybe Board
 placeQ' (Board _board diag r c nQueens mQueens size) (row, col) 
         | not $ canPlace base co = Nothing
@@ -71,7 +88,7 @@ canPlace (Board _board diag r c nQueens mQueens size) (row, col)
          | diag!!(diagonal size co) = False
          | r!!row = False
          | c!!col = False
-         | nQueens == size = False
+         | nQueens == mQueens = False
          | otherwise = True
          where base  = Board _board diag r c nQueens mQueens size
                co    = (row, col)

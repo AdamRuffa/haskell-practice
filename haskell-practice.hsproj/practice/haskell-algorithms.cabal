@@ -1,4 +1,4 @@
-name: practice
+name: haskell-algorithms
 version: 1.0
 cabal-version: 1.22
 build-type: Simple
