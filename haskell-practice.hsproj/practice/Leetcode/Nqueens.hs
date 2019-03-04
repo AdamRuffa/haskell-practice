@@ -12,12 +12,29 @@ data Board = Board { _board  :: [[Char]]
                    , _size    :: Int
                    } deriving (Show, Eq)
                  
+nQueens :: Int -> Int -> [[[Char]]]
+nQueens 0 _ = [[[]]]
+nQueens sizeOfBoard numQueens = map _board $ nQueens' sizeOfBoard numQueens
+
+
 nQueens' :: Int -> Int -> [Board]  
 nQueens' size num | size <= 0 = []
                   | num < 0   = []
                   | num == 0  = getBoard $ emptyBoard size 0
---                  | otherwise = 
+                  | otherwise = qround 0 num $ getBoard $ emptyBoard size num
                  
+
+qround :: Int -> Int -> [Board] -> [Board]
+qround round rounds boards | round < 0       = boards
+                           | round >= rounds = boards
+                           | otherwise       = (qround (round + 1) rounds) (qround' round boards)
+qround' :: Int -> [Board] -> [Board]
+qround' _ [] = []
+qround' round boards = 
+ (foldr (++) []) . (foldr (++) []) $
+ map (\co -> map (\b -> getBoard $ placeQ (Just b) co) 
+                 boards
+     ) $ allPositions (_size $ boards!!0)
 
 emptyBools :: Int -> [Bool]
 emptyBools size = replicate size False
@@ -58,13 +75,13 @@ getBoard :: Maybe Board -> [Board]
 getBoard board | board == Nothing = []
                | otherwise        = (\(Just b) -> [b]) board
                                          
+
 allPositions :: Int -> [(Int, Int)]
 allPositions size | size < 0  =  []
-                  | otherwise =  foldr (++) 
-                                 [] 
-                                 (map (\row -> map (\col -> (row, col)) 
-                                                   [0..(size - 1)])
-                                      [0..(size - 1)])
+                  | otherwise =  foldr (++) []
+                                       (map (\row -> map (\col -> (row, col)) 
+                                                         [0..(size - 1)])
+                                            [0..(size - 1)])
 
 placeQ :: Maybe Board -> (Int, Int) -> Maybe Board
 placeQ board (row, col) = board >>= (\board -> placeQ' board (row, col))
