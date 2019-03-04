@@ -30,11 +30,10 @@ qround round rounds boards | round < 0       = boards
                            | otherwise       = (qround (round + 1) rounds) (qround' round boards)
 qround' :: Int -> [Board] -> [Board]
 qround' _ [] = []
-qround' round boards = 
- (foldr (++) []) . (foldr (++) []) $
- map (\co -> map (\b -> getBoard $ placeQ (Just b) co) 
-                 boards
-     ) $ allPositions (_size $ boards!!0)
+qround' round boards = (foldr (++) []) . (foldr (++) []) $
+                       map (\co -> map (\b -> getBoard $ placeQ (Just b) co) 
+                                       boards
+                           ) $ allPositions (_size $ boards!!0)
 
 emptyBools :: Int -> [Bool]
 emptyBools size = replicate size False
