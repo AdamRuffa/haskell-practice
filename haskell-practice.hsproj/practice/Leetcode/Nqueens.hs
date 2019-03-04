@@ -46,13 +46,16 @@ diagonal size (row, col) | row < col = diagonal size (0, col - row)
                          | otherwise = diagonal size (row - col, 0)
 
 placeBool :: Int -> [Bool] -> [Bool]
-placeBool index list | index < 0 || index >= (length list) || list!!index == True = list
-                     | otherwise = list & element index .~ True            
+placeBool index list 
+ | index < 0 || index >= (length list) || list!!index == True = list
+ | otherwise = list & element index .~ True            
 placeChar :: (Int, Int) -> [[Char]] -> [[Char]]
-placeChar (row, col) board | row < 0 || col < 0 || row >= length board || col >= length (board!!0) || board!!row!!col == 'Q' = board
-                           | otherwise = (take row board)
-                                         ++ [(board!!row) & element col .~ 'Q'] ++
-                                         (drop (row + 1) board)
+placeChar (row, col) board 
+ | row < 0 || col < 0 || row >= length board || col >= length (board!!0) 
+           || board!!row!!col == 'Q' = board
+ | otherwise = (take row board)
+               ++ [(board!!row) & element col .~ 'Q'] ++
+               (drop (row + 1) board)
                                          
 getBoard :: Maybe Board -> [Board]
 getBoard board | board == Nothing = []
@@ -80,6 +83,7 @@ placeQ' (Board _board diag r c nQueens mQueens size) (row, col)
 
 canPlace :: Board -> (Int, Int) -> Bool
 canPlace (Board _board diag r c nQueens mQueens size) (row, col)
-         = not $ row < 0 || col < 0 || row >= size  || col >= size || diag!!(diagonal size co) || r!!row || c!!col || nQueens == mQueens
-         where base  = Board _board diag r c nQueens mQueens size
-               co    = (row, col)
+ = not $    row < 0 || col < 0 || row >= size  || col >= size 
+         || diag!!(diagonal size co) || r!!row || c!!col || nQueens == mQueens
+ where base  = Board _board diag r c nQueens mQueens size
+       co    = (row, col)
