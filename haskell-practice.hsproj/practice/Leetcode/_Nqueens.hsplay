@@ -1,10 +1,2 @@
 -- Haskell Playground 1.0
-
-length $ nQueens 8 6
-
-
-
-
-
-
-
+nQueens 1 1
