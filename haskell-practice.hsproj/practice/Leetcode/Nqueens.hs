@@ -31,18 +31,20 @@ qround' _ [] = []
 qround' round boards = (foldr (++) []) . (foldr (++) []) $
                        map (\co -> map (\b -> getBoard $ placeQ (Just b) co) 
                                        boards
-                           ) $ allPositions (_size $ boards!!0)
+                           ) $ [(r,c) | r <- perms, c <- perms]
+                     where perms = [0..(_size $ boards!!0)-1]
 
 -- initalizers
 emptyBools :: Int -> [Bool]
 emptyBools size = replicate size False
 emptyBoard :: Int -> Int -> Maybe Board
 emptyBoard size wantedQueens =   Just $ Board (map (replicate size) $ replicate size '.') 
-                                              (emptyBools (size * 2 - 1))
-                                              (emptyBools (size * 2 - 1))
-                                              (emptyBools size) 
-                                              (emptyBools size)
+                                              diagonals diagonals
+                                              laterals laterals
                                               size
+                             where diagonals = emptyBools (size * 2 - 1)
+                                   laterals  = emptyBools size
+                             
 
 -- calculations for diagonal uniqueness
 diagonal :: Int -> (Int, Int) -> Int
@@ -68,13 +70,7 @@ placeChar (row, col) board
 getBoard :: Maybe Board -> [Board]
 getBoard board | board == Nothing = []
                | otherwise        = (\(Just b) -> [b]) board
-                                    
--- all permutations of coordinates     
-allPositions :: Int -> [(Int, Int)]
-allPositions size 
- | size < 0  =  []
- | otherwise =  foldr (++) [] (map (\row -> map (\col -> (row, col)) [0..(size - 1)]) [0..(size - 1)])
-
+               
 -- put a queen on a board if possible, otherwise fail this permutation
 placeQ  :: Maybe Board -> (Int, Int) -> Maybe Board
 placeQ  board (row, col) = board >>= (\board -> placeQ' board (row, col))
