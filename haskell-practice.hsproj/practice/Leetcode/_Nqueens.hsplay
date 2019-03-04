@@ -1,2 +1,17 @@
 -- Haskell Playground 1.0
-nQueens 1 1
+x n = map (length . nQueens n) [1..n]
+nQueens 3 2
+
+
+
+
+
+
+
+
+
+
+
+
+
+

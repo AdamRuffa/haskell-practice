@@ -50,7 +50,7 @@ diagonal' :: Int -> (Int, Int) -> Int
 diagonal' _ (row, col) = row + col
 
 placeBool :: Int -> [Bool] -> [Bool]
-placeBool index list = list & element index .~ (index < 0 || index >= (length list) || list!!index)
+placeBool index list = list & element index .~ not (index < 0 || index >= (length list) || list!!index)
 placeChar :: (Int, Int) -> [[Char]] -> [[Char]]
 placeChar (row, col) board 
  | row < 0 || col < 0 || row >= length board || col >= length (board!!0) 
