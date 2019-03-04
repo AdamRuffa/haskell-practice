@@ -8,8 +8,6 @@ data Board = Board { _board   :: [[Char]]
                    , _diag'   :: [Bool]
                    , _row     :: [Bool]
                    , _col     :: [Bool]
-                   , _nQueens :: Int
-                   , _mQueens :: Int
                    , _size    :: Int
                    } deriving (Show, Eq)
                  
@@ -30,7 +28,7 @@ qround round rounds boards | round < 0 || round >= rounds = boards
                            | otherwise = (qround (round + 1) rounds) (qround' round boards)
 qround' :: Int -> [Board] -> [Board]
 qround' _ [] = []
-qround' round boards = concat . concat $
+qround' round boards = (foldr (++) []) . (foldr (++) []) $
                        map (\co -> map (\b -> getBoard $ placeQ (Just b) co) 
                                        boards
                            ) $ allPositions (_size $ boards!!0)
@@ -44,7 +42,7 @@ emptyBoard size wantedQueens =   Just $ Board (map (replicate size) $ replicate 
                                               (emptyBools (size * 2 - 1))
                                               (emptyBools size) 
                                               (emptyBools size)
-                                              0 wantedQueens size
+                                              size
 
 -- calculations for diagonal uniqueness
 diagonal :: Int -> (Int, Int) -> Int
@@ -73,23 +71,25 @@ getBoard board | board == Nothing = []
                                     
 -- all permutations of coordinates     
 allPositions :: Int -> [(Int, Int)]
-allPositions size = [(row, col) | row <- [0..(size-1)], col <- [0..(size-1)]]
+allPositions size 
+ | size < 0  =  []
+ | otherwise =  foldr (++) [] (map (\row -> map (\col -> (row, col)) [0..(size - 1)]) [0..(size - 1)])
 
 -- put a queen on a board if possible, otherwise fail this permutation
 placeQ  :: Maybe Board -> (Int, Int) -> Maybe Board
 placeQ  board (row, col) = board >>= (\board -> placeQ' board (row, col))
 placeQ' :: Board -> (Int, Int) -> Maybe Board
-placeQ' base@(Board _board diag diag' r c nQueens mQueens size) co@(row, col) 
+placeQ' base@(Board _board diag diag' r c size) co@(row, col) 
         | not $ canPlace base co = Nothing
         | otherwise              = Just $ Board (placeChar co _board)
                                                 (placeBool (diagonal size co) diag)
                                                 (placeBool (diagonal' size co) diag')
                                                 (placeBool row r)
                                                 (placeBool col c)
-                                                (nQueens + 1) mQueens size
+                                                size
 
 -- checker to see if we can place a queen on given coordinates of a Board state
 canPlace :: Board -> (Int, Int) -> Bool
-canPlace base@(Board _board diag diag' r c nQueens mQueens size) co@(row, col)
+canPlace base@(Board _board diag diag' r c size) co@(row, col)
  = not $    diag!!(diagonal size co) || diag'!!(diagonal' size co)
-         || r!!row || c!!col || nQueens == mQueens
+         || r!!row || c!!col
