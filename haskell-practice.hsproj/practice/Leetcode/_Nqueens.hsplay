@@ -3,7 +3,7 @@ x n = map (length . nQueens n) [1..n]
 
 :t nub
 
-length $ nQueens 4 4
+nQueens 8 4
 
 
 

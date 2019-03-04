@@ -29,7 +29,7 @@ qround round rounds boards | round < 0 || round >= rounds = boards
                            | otherwise = (qround (round + 1) rounds) . nub $ (qround' round boards)
 qround' :: Int -> [Board] -> [Board]
 qround' _ [] = []
-qround' round boards = (foldr (++) []) . (foldr (++) []) $
+qround' round boards = concat . concat $
                        map (\co -> map (\b -> getBoard $ placeQ (Just b) co) 
                                        boards
                            ) $ [(r,c) | r <- perms, c <- perms]
