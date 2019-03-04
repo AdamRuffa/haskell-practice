@@ -1,6 +1,7 @@
 module Leetcode.Nqueens where
 
-import Data.Bool
+import Data.Bool 
+import Data.List
 import Control.Lens
 
 data Board = Board { _board   :: [[Char]]
@@ -25,7 +26,7 @@ nQueens' size num | size <= 0 || num < 0   = []
 -- those as inputs to the next round of permutation generation                 
 qround :: Int -> Int -> [Board] -> [Board]
 qround round rounds boards | round < 0 || round >= rounds = boards
-                           | otherwise = (qround (round + 1) rounds) (qround' round boards)
+                           | otherwise = (qround (round + 1) rounds) . nub $ (qround' round boards)
 qround' :: Int -> [Board] -> [Board]
 qround' _ [] = []
 qround' round boards = (foldr (++) []) . (foldr (++) []) $
