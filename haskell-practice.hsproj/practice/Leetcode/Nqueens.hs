@@ -3,8 +3,9 @@ module Leetcode.Nqueens where
 import Data.Bool
 import Control.Lens
 
-data Board = Board { _board  :: [[Char]]
+data Board = Board { _board   :: [[Char]]
                    , _diag    :: [Bool]
+                   , _diag'   :: [Bool]
                    , _row     :: [Bool]
                    , _col     :: [Bool]
                    , _nQueens :: Int
@@ -34,7 +35,8 @@ emptyBools :: Int -> [Bool]
 emptyBools size = replicate size False
 emptyBoard :: Int -> Int -> Maybe Board
 emptyBoard size wantedQueens =   Just $ Board (map (replicate size) $ replicate size '.') 
-                                              (emptyBools (size * 2 - 1)) 
+                                              (emptyBools (size * 2 - 1))
+                                              (emptyBools (size * 2 - 1))
                                               (emptyBools size) 
                                               (emptyBools size)
                                               0 wantedQueens size
@@ -44,6 +46,8 @@ diagonal size (0, col) = size - 1 + col
 diagonal size (row, 0) = size - 1 - row
 diagonal size (row, col) | row < col = diagonal size (0, col - row)
                          | otherwise = diagonal size (row - col, 0)
+diagonal' :: Int -> (Int, Int) -> Int
+diagonal' _ (row, col) = row + col
 
 placeBool :: Int -> [Bool] -> [Bool]
 placeBool index list 
@@ -71,19 +75,21 @@ allPositions size | size < 0  =  []
 placeQ  :: Maybe Board -> (Int, Int) -> Maybe Board
 placeQ  board (row, col) = board >>= (\board -> placeQ' board (row, col))
 placeQ' :: Board -> (Int, Int) -> Maybe Board
-placeQ' (Board _board diag r c nQueens mQueens size) (row, col) 
+placeQ' (Board _board diag diag' r c nQueens mQueens size) (row, col) 
         | not $ canPlace base co = Nothing
         | otherwise              = Just $ Board (placeChar co _board)
                                                 (placeBool (diagonal size co) diag)
+                                                (placeBool (diagonal' size co) diag')
                                                 (placeBool row r)
                                                 (placeBool col c)
                                                 (nQueens + 1) mQueens size
-        where base  = Board _board diag r c nQueens mQueens size
+        where base  = Board _board diag diag' r c nQueens mQueens size
               co    = (row, col)
 
 canPlace :: Board -> (Int, Int) -> Bool
-canPlace (Board _board diag r c nQueens mQueens size) (row, col)
+canPlace (Board _board diag diag' r c nQueens mQueens size) (row, col)
  = not $    row < 0 || col < 0 || row >= size  || col >= size 
-         || diag!!(diagonal size co) || r!!row || c!!col || nQueens == mQueens
- where base  = Board _board diag r c nQueens mQueens size
+         || diag!!(diagonal size co) || diag'!!(diagonal' size co)
+         || r!!row || c!!col || nQueens == mQueens
+ where base  = Board _board diag diag' r c nQueens mQueens size
        co    = (row, col)
