@@ -11,8 +11,11 @@ executable practice
     main-is: Main.hs
     build-depends:
         lens -any,
-        base -any
+        unordered-containers -any,
+        base -any,
+        hashable -any
     default-language: Haskell2010
     other-modules:
+        Leetcode.Fast_Nqueens
         Leetcode.Nqueens
 

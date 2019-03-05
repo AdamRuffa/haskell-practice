@@ -1,29 +1,5 @@
 -- Haskell Playground 1.0
-x n = map (length . nQueens n) [1..n]
 
-:t nub
+hash $ (nQueens 8 2)!!5
 
-nQueens 8 4
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+nQueens 8 0
