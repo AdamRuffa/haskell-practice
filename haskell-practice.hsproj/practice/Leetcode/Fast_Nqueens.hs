@@ -17,30 +17,39 @@ instance Hashable Board where
   hashWithSalt s board@(Board a b c d e f) = 
    s + (hash a) * 31 + (hash b) * 31 + (hash c) * 31 
      + (hash d) * 31 + (hash e) * 31 + (hash f) * 31
-                 
+
+getBoard :: (HashMap Board (), [Board]) -> [Board]
+getBoard (_, b) = b
+getHmap  :: (HashMap Board (), [Board]) -> HashMap Board ()
+getHmap  (h, _) = h
+
 -- entrypoint function returns list of board representations;
 -- Usage: nQueens 5 3 e.g. on a 5x5 board search for permutations of 3 valid queens
 nQueens  :: Int -> Int -> [[[Char]]]
-nQueens sizeOfBoard numQueens = map _board $ nQueens' sizeOfBoard numQueens
-nQueens' :: Int -> Int -> [Board]  
-nQueens' size num 
- | size <= 0 || num < 0 = []
- | num == 0             = emptyBoard size
- | otherwise            = qround 0 num (emptyBoard size) size
+nQueens sizeOfBoard numQueens = map _board $ getBoard $ nQueens' sizeOfBoard numQueens empty
+nQueens' :: Int -> Int -> HashMap Board () -> (HashMap Board (), [Board])
+nQueens' size num _map
+ | size <= 0 || num < 0 = (_map, [])
+ | num == 0             = (_map, emptyBoard size)
+ | otherwise            = qround 0 num (emptyBoard size) size _map
 
 -- recursive permutation builder; starts with base permutations and uses
 -- those as inputs to the next round of permutation generation                 
-qround :: Int -> Int -> [Board] -> Int -> [Board]
-qround round rounds boards size
- | round < 0 || round >= rounds = boards
- | otherwise = (qround (round + 1) rounds) (qround' round boards size) $ size
-qround' :: Int -> [Board] -> Int -> [Board]
-qround' _ [] _ = []
-qround' round boards size = 
- concat . concat
- $ map (\co -> map (\b -> placeQ [b] co) boards) 
- $ [(r,c) | r <- perms, c <- perms]
- where perms = [0..(size-1)]
+qround :: Int -> Int -> [Board] -> Int -> HashMap Board () -> (HashMap Board (), [Board])
+qround round rounds boards size _map
+ | round < 0 || round >= rounds = (_map, boards)
+ | otherwise = (qround (round + 1) rounds) (qround' round boards size _map) $ size
+qround' :: Int -> [Board] -> Int -> HashMap Board () -> (HashMap Board (), [Board])
+qround' _ [] _ _map = (_map, [])
+qround' round boards size _map = do
+  let perms = [0..(size-1)]
+  let coperms = [(r,c) | r <- perms, c <- perms]
+  let permutate = 
+       concat . (\board co ->
+               let b' = placeQ [board] co in
+               if b' == [] ||  b'!!0 `member` _map
+                then [] else [(placeQ [board] co)])
+  (_map, permutate boards coperms)
 
 -- initalizers
 emptyBools :: Int -> [Bool]
